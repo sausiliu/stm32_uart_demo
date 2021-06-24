@@ -23,6 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -220,7 +221,17 @@ void DMA1_Channel5_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-
+	uint32_t idle_flag = 0;
+	uint32_t reserve_buffer = 0;
+	
+	idle_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE);
+	if (idle_flag != RESET)
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(&huart1);// Clear idle
+		HAL_UART_DMAStop(&huart1);//Stop DMA
+		reserve_buffer = __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
+		rx_len = RX_BUFFER_SIZE - reserve_buffer;
+	}
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
