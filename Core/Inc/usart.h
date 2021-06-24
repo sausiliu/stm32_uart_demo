@@ -34,13 +34,18 @@ extern "C" {
 extern UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN Private defines */
-
+#define RX_BUFFER_SIZE  100
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart1_tx;
 
+extern volatile uint8_t rx_len ;
+extern volatile uint8_t recv_end_flag;
+extern uint8_t rx_buffer[RX_BUFFER_SIZE];
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

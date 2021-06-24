@@ -35,7 +35,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RX_BUFFER_SIZE 5
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,13 +56,13 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t UART1_rxBuffer[RX_BUFFER_SIZE] = {0};
+//uint8_t UART1_rxBuffer[RX_BUFFER_SIZE] = {0};
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart1, UART1_rxBuffer, RX_BUFFER_SIZE, 100);
-	HAL_UART_Receive_DMA(&huart1, UART1_rxBuffer, RX_BUFFER_SIZE);
+	HAL_UART_Transmit(&huart1, rx_buffer, RX_BUFFER_SIZE, 100);
+	HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
 /* USER CODE END 0 */
@@ -99,7 +98,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	HAL_UART_Receive_DMA(&huart1, UART1_rxBuffer, RX_BUFFER_SIZE);
+	HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
