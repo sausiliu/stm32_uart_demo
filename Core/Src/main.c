@@ -65,6 +65,41 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
+void Enable_UARTRx_IT()
+{
+	GPIO_InitTypeDef GPIO_InitStruct;
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+}
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == GPIO_PIN_10)
+	{
+		//  HAL_NVIC_EnableIRQ(SysTick_IRQn);
+		HAL_Init();
+		SystemClock_Config();
+		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);//
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		//__HAL_RCC_GPIOA_CLK_ENABLE();
+		//__HAL_RCC_GPIOB_CLK_ENABLE();
+		MX_USART1_UART_Init();
+	}
+}
+
+void Go_Stop_Mode()
+{
+	Enable_UARTRx_IT();
+	HAL_SuspendTick();
+	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -105,12 +140,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {	
-	  for(int i=0; i<100; i++)
+	  for(int i=300; i>0; i--)
 		{
 			HAL_Delay(i);
 			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		}
-		
+		Go_Stop_Mode();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
