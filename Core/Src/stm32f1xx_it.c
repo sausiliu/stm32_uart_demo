@@ -231,10 +231,12 @@ void USART1_IRQHandler(void)
 		HAL_UART_DMAStop(&huart1);//Stop DMA
 		reserve_buffer = __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
 		rx_len = RX_BUFFER_SIZE - reserve_buffer;
+		HAL_UART_RxCpltCallback(&huart1);
+		return;
 	}
   /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
+  //HAL_UART_IRQHandler(&huart1);
+	/* USER CODE BEGIN USART1_IRQn 1 */
 
   /* USER CODE END USART1_IRQn 1 */
 }

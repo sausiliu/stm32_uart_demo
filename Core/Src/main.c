@@ -60,8 +60,8 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart1, rx_buffer, RX_BUFFER_SIZE, 100);
+	//HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, rx_buffer, rx_len, HAL_MAX_DELAY);
 	HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
@@ -74,7 +74,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -104,9 +104,13 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  {
-		HAL_Delay(20);
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+  {	
+	  for(int i=0; i<100; i++)
+		{
+			HAL_Delay(i);
+			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		}
+		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
