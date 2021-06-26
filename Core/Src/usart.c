@@ -24,6 +24,18 @@
 volatile uint8_t rx_len = 0;
 volatile uint8_t recv_end_flag = 0;
 uint8_t rx_buffer[RX_BUFFER_SIZE]={0};
+
+struct __FILE
+{
+	int handle;
+};
+FILE __stdout;
+
+int fputc(int ch, FILE *f)
+{
+	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+	return (ch);
+}
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
