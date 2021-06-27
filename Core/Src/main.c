@@ -20,8 +20,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
+#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
+#include "ads1115.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -45,6 +47,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+#define ADS1115_ADDRESS 0x48
+unsigned char ADSwrite[3];
+int16_t reading;
+float voltage[4];
+const float voltageConv = 6.114 / 32768.0;
 
 /* USER CODE END PV */
 
@@ -90,6 +97,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		//__HAL_RCC_GPIOA_CLK_ENABLE();
 		//__HAL_RCC_GPIOB_CLK_ENABLE();
 		MX_USART1_UART_Init();
+		MX_I2C1_Init();
 	}
 }
 
@@ -132,6 +140,7 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 	//HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
   /* USER CODE END 2 */
@@ -140,13 +149,59 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {	
-	  for(int i=300; i>0; i--)
+	  for(int i=100; i>0; i--)
 		{
 			HAL_Delay(i);
 			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		}
 		Go_Stop_Mode();
-    /* USER CODE END WHILE */
+		HAL_Delay(10);
+		voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
+		voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
+		voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
+		voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
+		printf("-------------------------------------\n");
+		printf("voltage0: %f\n", voltage[0]);
+		printf("voltage1: %f\n", voltage[1]);
+		printf("voltage2: %f\n", voltage[2]);
+		printf("voltage3: %f\n", voltage[3]);
+		
+		for(int i=0; i< 4; i++){
+			ADSwrite[0] = 0x01;
+			switch(i){
+				case(0):
+					ADSwrite[1] = 0xC1;
+				break;
+				case(1):
+					ADSwrite[1] = 0xD1;
+				break;
+				case(2):
+					ADSwrite[1] = 0xE1;
+				break;
+				case(3):
+					ADSwrite[1] = 0xF1;
+				break;
+			}
+			
+			ADSwrite[2] = 0x83; //10000011 LSB
+			HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 3, 100);
+			ADSwrite[0] = 0x00;
+			HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1 , ADSwrite, 1 ,100);
+			HAL_Delay(20);
+			HAL_I2C_Master_Receive(&hi2c1, ADS1115_ADDRESS <<1, ADSwrite, 2, 100);
+			reading = (ADSwrite[0] << 8 | ADSwrite[1] );
+			if(reading < 0) {
+				reading = 0;
+			}
+			voltage[i] = reading * voltageConv;
+		}
+
+		printf("\n\n=============================\n");
+		printf("voltage0: %f\n", voltage[0]);
+		printf("voltage1: %f\n", voltage[1]);
+		printf("voltage2: %f\n", voltage[2]);
+		printf("voltage3: %f\n", voltage[3]);
+		/* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
