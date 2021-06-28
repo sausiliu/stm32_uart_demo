@@ -51,8 +51,8 @@
 #define ADS1115_ADDRESS 0x48
 unsigned char ADSwrite[3];
 int16_t reading;
-float voltage[4];
-const float voltageConv = 6.114 / 32768.0;
+double voltage[4];
+const double voltageConv = 6.114 / 32768.0;
 
 /* USER CODE END PV */
 
@@ -162,56 +162,29 @@ int main(void)
         voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
         voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
         voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
-        printf("-------------------------------------\n");
-        printf("voltage0: %f\n", voltage[0]);
-        printf("voltage1: %f\n", voltage[1]);
-        printf("voltage2: %f\n", voltage[2]);
-        printf("voltage3: %f\n", voltage[3]);
-
+    
+        JSON_Value *root_value = json_value_init_object();
+        JSON_Object *root_object = json_value_get_object(root_value);
+        char *serialized_string = NULL;
+        char buffer[4][10];
+        
+        
         for(int i = 0; i < 4; i++)
         {
-            ADSwrite[0] = 0x01;
-
-            switch(i)
-            {
-                case(0):
-                    ADSwrite[1] = 0xC1;
-                    break;
-
-                case(1):
-                    ADSwrite[1] = 0xD1;
-                    break;
-
-                case(2):
-                    ADSwrite[1] = 0xE1;
-                    break;
-
-                case(3):
-                    ADSwrite[1] = 0xF1;
-                    break;
-            }
-
-            ADSwrite[2] = 0x83; //10000011 LSB
-            HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 3, 100);
-            ADSwrite[0] = 0x00;
-            HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 1, 100);
-            HAL_Delay(20);
-            HAL_I2C_Master_Receive(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 2, 100);
-            reading = (ADSwrite[0] << 8 | ADSwrite[1] );
-
-            if(reading < 0)
-            {
-                reading = 0;
-            }
-
-            voltage[i] = reading * voltageConv;
+            sprintf(buffer[i], "%.4f", voltage[i]);
         }
-
-        printf("\n\n=============================\n");
-        printf("voltage0: %f\n", voltage[0]);
-        printf("voltage1: %f\n", voltage[1]);
-        printf("voltage2: %f\n", voltage[2]);
-        printf("voltage3: %f\n", voltage[3]);
+        
+        json_object_set_string(root_object, "stm32", "humi");
+        json_object_set_string(root_object, "adc0", buffer[0]);
+        json_object_set_string(root_object, "adc1", buffer[1]);
+        json_object_set_string(root_object, "adc2", buffer[2]);
+        json_object_set_string(root_object, "adc3", buffer[3]);
+        
+        serialized_string = json_serialize_to_string_pretty(root_value);
+        puts(serialized_string);
+        json_free_serialized_string(serialized_string);
+        json_value_free(root_value);
+        
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
