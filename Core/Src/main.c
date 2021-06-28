@@ -68,45 +68,45 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	//HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart1, rx_buffer, rx_len, HAL_MAX_DELAY);
-	HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
+    //HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, rx_buffer, rx_len, HAL_MAX_DELAY);
+    HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
 void Enable_UARTRx_IT()
 {
-	GPIO_InitTypeDef GPIO_InitStruct;
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-  GPIO_InitStruct.Pin = GPIO_PIN_10;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+    GPIO_InitTypeDef GPIO_InitStruct;
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    GPIO_InitStruct.Pin = GPIO_PIN_10;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	if(GPIO_Pin == GPIO_PIN_10)
-	{
-		//  HAL_NVIC_EnableIRQ(SysTick_IRQn);
-		HAL_Init();
-		SystemClock_Config();
-		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);//
-		__HAL_RCC_GPIOA_CLK_ENABLE();
-		//__HAL_RCC_GPIOA_CLK_ENABLE();
-		//__HAL_RCC_GPIOB_CLK_ENABLE();
-		MX_USART1_UART_Init();
-		MX_I2C1_Init();
-	}
+    if(GPIO_Pin == GPIO_PIN_10)
+    {
+        //  HAL_NVIC_EnableIRQ(SysTick_IRQn);
+        HAL_Init();
+        SystemClock_Config();
+        HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);//
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+        //__HAL_RCC_GPIOA_CLK_ENABLE();
+        //__HAL_RCC_GPIOB_CLK_ENABLE();
+        MX_USART1_UART_Init();
+        MX_I2C1_Init();
+    }
 }
 
 void Go_Stop_Mode()
 {
-	Enable_UARTRx_IT();
-	HAL_SuspendTick();
-	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+    Enable_UARTRx_IT();
+    HAL_SuspendTick();
+    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 }
 
 /* USER CODE END 0 */
@@ -117,96 +117,107 @@ void Go_Stop_Mode()
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-	
-  /* USER CODE END 1 */
+    /* USER CODE BEGIN 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* USER CODE END 1 */
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* USER CODE BEGIN Init */
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE END Init */
+    /* USER CODE BEGIN Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* USER CODE END Init */
 
-  /* USER CODE BEGIN SysInit */
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE END SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_USART1_UART_Init();
-  MX_I2C1_Init();
-  /* USER CODE BEGIN 2 */
-	//HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
-  /* USER CODE END 2 */
+    /* USER CODE END SysInit */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  for(int i=100; i>0; i--)
-		{
-			HAL_Delay(i);
-			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-		}
-		Go_Stop_Mode();
-		HAL_Delay(10);
-		voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
-		voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
-		voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
-		voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
-		printf("-------------------------------------\n");
-		printf("voltage0: %f\n", voltage[0]);
-		printf("voltage1: %f\n", voltage[1]);
-		printf("voltage2: %f\n", voltage[2]);
-		printf("voltage3: %f\n", voltage[3]);
-		
-		for(int i=0; i< 4; i++){
-			ADSwrite[0] = 0x01;
-			switch(i){
-				case(0):
-					ADSwrite[1] = 0xC1;
-				break;
-				case(1):
-					ADSwrite[1] = 0xD1;
-				break;
-				case(2):
-					ADSwrite[1] = 0xE1;
-				break;
-				case(3):
-					ADSwrite[1] = 0xF1;
-				break;
-			}
-			
-			ADSwrite[2] = 0x83; //10000011 LSB
-			HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 3, 100);
-			ADSwrite[0] = 0x00;
-			HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1 , ADSwrite, 1 ,100);
-			HAL_Delay(20);
-			HAL_I2C_Master_Receive(&hi2c1, ADS1115_ADDRESS <<1, ADSwrite, 2, 100);
-			reading = (ADSwrite[0] << 8 | ADSwrite[1] );
-			if(reading < 0) {
-				reading = 0;
-			}
-			voltage[i] = reading * voltageConv;
-		}
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_USART1_UART_Init();
+    MX_I2C1_Init();
+    /* USER CODE BEGIN 2 */
+    //HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
+    /* USER CODE END 2 */
 
-		printf("\n\n=============================\n");
-		printf("voltage0: %f\n", voltage[0]);
-		printf("voltage1: %f\n", voltage[1]);
-		printf("voltage2: %f\n", voltage[2]);
-		printf("voltage3: %f\n", voltage[3]);
-		/* USER CODE END WHILE */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+        for(int i = 100; i > 0; i--)
+        {
+            HAL_Delay(i);
+            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        }
 
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+        Go_Stop_Mode();
+        HAL_Delay(10);
+        voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
+        voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
+        voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
+        voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
+        printf("-------------------------------------\n");
+        printf("voltage0: %f\n", voltage[0]);
+        printf("voltage1: %f\n", voltage[1]);
+        printf("voltage2: %f\n", voltage[2]);
+        printf("voltage3: %f\n", voltage[3]);
+
+        for(int i = 0; i < 4; i++)
+        {
+            ADSwrite[0] = 0x01;
+
+            switch(i)
+            {
+                case(0):
+                    ADSwrite[1] = 0xC1;
+                    break;
+
+                case(1):
+                    ADSwrite[1] = 0xD1;
+                    break;
+
+                case(2):
+                    ADSwrite[1] = 0xE1;
+                    break;
+
+                case(3):
+                    ADSwrite[1] = 0xF1;
+                    break;
+            }
+
+            ADSwrite[2] = 0x83; //10000011 LSB
+            HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 3, 100);
+            ADSwrite[0] = 0x00;
+            HAL_I2C_Master_Transmit(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 1, 100);
+            HAL_Delay(20);
+            HAL_I2C_Master_Receive(&hi2c1, ADS1115_ADDRESS << 1, ADSwrite, 2, 100);
+            reading = (ADSwrite[0] << 8 | ADSwrite[1] );
+
+            if(reading < 0)
+            {
+                reading = 0;
+            }
+
+            voltage[i] = reading * voltageConv;
+        }
+
+        printf("\n\n=============================\n");
+        printf("voltage0: %f\n", voltage[0]);
+        printf("voltage1: %f\n", voltage[1]);
+        printf("voltage2: %f\n", voltage[2]);
+        printf("voltage3: %f\n", voltage[3]);
+        /* USER CODE END WHILE */
+
+        /* USER CODE BEGIN 3 */
+    }
+
+    /* USER CODE END 3 */
 }
 
 /**
@@ -215,36 +226,38 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    /** Initializes the RCC Oscillators according to the specified parameters
+    * in the RCC_OscInitTypeDef structure.
+    */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /** Initializes the CPU, AHB and APB buses clocks
+    */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    {
+        Error_Handler();
+    }
 }
 
 /* USER CODE BEGIN 4 */
@@ -257,13 +270,15 @@ void SystemClock_Config(void)
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
+    /* USER CODE BEGIN Error_Handler_Debug */
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+
+    while (1)
+    {
+    }
+
+    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
@@ -276,10 +291,10 @@ void Error_Handler(void)
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+    /* USER CODE BEGIN 6 */
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
 
