@@ -110,6 +110,24 @@ void Go_Stop_Mode()
     HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 }
 
+void DO_BLINK(int count)
+{
+    char flag = 1;
+    int breath_time = 20; // 20ms
+    for(uint8_t i = 0; i < count; i++)
+    {
+        for(uint8_t j = 0; j < breath_time; j++)
+        {
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+            HAL_Delay(flag == 0 ? j : breath_time - j);
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+            HAL_Delay(flag > 0 ? j : breath_time - j);
+        }
+        flag = !flag;
+        HAL_Delay(100);
+    }
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -150,14 +168,14 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
-    {
-        for(int i = 100; i > 0; i--)
-        {
-            HAL_Delay(i);
-            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-        }
-
+    {   
+        /*Do blink*/
+        DO_BLINK(20);
+        
+        /*Go to sleep*/
         Go_Stop_Mode();
+        
+        /*Wake up from stop mode*/
         HAL_Delay(10);
         voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
         voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
