@@ -53,6 +53,7 @@
 unsigned char ADSwrite[3];
 const double voltageConv = 6.114 / 32768.0;
 
+char * adc_name[4] = {"adc0", "adc1", "adc2", "adc3"};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -144,11 +145,11 @@ void Get_ADC()
     JSON_Object *root_object = json_value_get_object(root_value);
     char *serialized_string = NULL;
     
-    json_object_set_string(root_object, "stm32", "humi");
-    json_object_set_number(root_object, "adc0", voltage[0]);
-    json_object_set_number(root_object, "adc1", voltage[1]);
-    json_object_set_number(root_object, "adc2", voltage[2]);
-    json_object_set_number(root_object, "adc3", voltage[3]);
+    json_object_set_string(root_object, "device", "humi");
+    for(int i = 0; i < 4; i++)
+    {
+        json_object_set_number(root_object, adc_name[i], voltage[i]);
+    }
 
     serialized_string = json_serialize_to_string(root_value);
     printf("%04d%s", strlen(serialized_string), serialized_string);
