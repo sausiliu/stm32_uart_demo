@@ -51,8 +51,6 @@
 /* USER CODE BEGIN PV */
 #define ADS1115_ADDRESS 0x48
 unsigned char ADSwrite[3];
-int16_t reading;
-double voltage[4];
 const double voltageConv = 6.114 / 32768.0;
 
 /* USER CODE END PV */
@@ -70,6 +68,7 @@ void SystemClock_Config(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     //HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
+    /*Do echo*/
     HAL_UART_Transmit(&huart1, rx_buffer, rx_len, HAL_MAX_DELAY);
     HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
@@ -114,6 +113,7 @@ void DO_BLINK(int count)
 {
     char flag = 1;
     int breath_time = 20; // 20ms
+
     for(uint8_t i = 0; i < count; i++)
     {
         for(uint8_t j = 0; j < breath_time; j++)
@@ -123,10 +123,37 @@ void DO_BLINK(int count)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
             HAL_Delay(flag > 0 ? j : breath_time - j);
         }
+
         flag = !flag;
         HAL_Delay(100);
     }
 
+}
+
+void Get_ADC()
+{
+    double voltage[4];
+
+    voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
+    voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
+    voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
+    voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
+
+    /*Create json object*/
+    JSON_Value *root_value = json_value_init_object();
+    JSON_Object *root_object = json_value_get_object(root_value);
+    char *serialized_string = NULL;
+    
+    json_object_set_string(root_object, "stm32", "humi");
+    json_object_set_number(root_object, "adc0", voltage[0]);
+    json_object_set_number(root_object, "adc1", voltage[1]);
+    json_object_set_number(root_object, "adc2", voltage[2]);
+    json_object_set_number(root_object, "adc3", voltage[3]);
+
+    serialized_string = json_serialize_to_string(root_value);
+    printf("%04d%s", strlen(serialized_string), serialized_string);
+    json_free_serialized_string(serialized_string);
+    json_value_free(root_value);
 }
 /* USER CODE END 0 */
 
@@ -168,42 +195,17 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
-    {   
+    {
         /*Do blink*/
-        DO_BLINK(20);
-        
+        DO_BLINK(5);
+
         /*Go to sleep*/
         Go_Stop_Mode();
-        
+
         /*Wake up from stop mode*/
         HAL_Delay(10);
-        voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
-        voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
-        voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
-        voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
-    
-        JSON_Value *root_value = json_value_init_object();
-        JSON_Object *root_object = json_value_get_object(root_value);
-        char *serialized_string = NULL;
-        char buffer[4][10];
-        
-        
-        for(int i = 0; i < 4; i++)
-        {
-            sprintf(buffer[i], "%.4f", voltage[i]);
-        }
-        
-        json_object_set_string(root_object, "stm32", "humi");
-        json_object_set_string(root_object, "adc0", buffer[0]);
-        json_object_set_string(root_object, "adc1", buffer[1]);
-        json_object_set_string(root_object, "adc2", buffer[2]);
-        json_object_set_string(root_object, "adc3", buffer[3]);
-        
-        serialized_string = json_serialize_to_string_pretty(root_value);
-        puts(serialized_string);
-        json_free_serialized_string(serialized_string);
-        json_value_free(root_value);
-        
+        Get_ADC();
+
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
