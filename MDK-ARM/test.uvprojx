@@ -539,6 +539,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\parson.c</FilePath>
             </File>
+            <File>
+              <FileName>cmd_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmd_list.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

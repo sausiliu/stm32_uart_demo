@@ -30,6 +30,7 @@
 #include "string.h"
 #include "parson.h"
 #include "ads1115.h"
+#include "cmd_list.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,7 +71,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     //HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
     /*Do echo*/
-    HAL_UART_Transmit(&huart1, rx_buffer, rx_len, HAL_MAX_DELAY);
+    if(CMD_ADD_TAIL(rx_buffer, rx_len))
+        HAL_UART_Transmit(&huart1, CMD_ERROR, 1, HAL_MAX_DELAY);
     HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
@@ -124,8 +126,13 @@ void DO_BLINK(int count)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
             HAL_Delay(flag > 0 ? j : breath_time - j);
         }
-
         flag = !flag;
+        
+        /*check weather the command is empty, if not , we should do somethins...*/
+        if (cmd_list_header->next != NULL)
+        {
+            HAL_Delay(10);
+        }
         HAL_Delay(100);
     }
 
@@ -143,6 +150,7 @@ void Get_ADC()
     /*Create json object*/
     JSON_Value *root_value = json_value_init_object();
     JSON_Object *root_object = json_value_get_object(root_value);
+    
     char *serialized_string = NULL;
     
     json_object_set_string(root_object, "device", "humi");
@@ -191,6 +199,7 @@ int main(void)
     MX_I2C1_Init();
     /* USER CODE BEGIN 2 */
     //HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
+    CMD_LIST_NODE_INIT(cmd_list_header);
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -198,7 +207,7 @@ int main(void)
     while (1)
     {
         /*Do blink*/
-        DO_BLINK(5);
+        DO_BLINK(50);
 
         /*Go to sleep*/
         Go_Stop_Mode();
