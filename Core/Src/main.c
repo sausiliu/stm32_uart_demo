@@ -23,12 +23,13 @@
 #include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
-#include "ads1115.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "string.h"
 #include "parson.h"
+#include "ads1115.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
