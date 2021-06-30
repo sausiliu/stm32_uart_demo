@@ -54,7 +54,6 @@
 unsigned char ADSwrite[3];
 const double voltageConv = 6.114 / 32768.0;
 
-char * adc_name[4] = {"adc0", "adc1", "adc2", "adc3"};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,8 +70,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     //HAL_UART_Transmit(&huart1, "interrupt\n", 10, HAL_MAX_DELAY);
     /*Do echo*/
-    if(CMD_ADD_TAIL(rx_buffer, rx_len))
-        HAL_UART_Transmit(&huart1, CMD_ERROR, 1, HAL_MAX_DELAY);
+    int ret;
+    ret = CMD_ADD_TAIL(rx_buffer, rx_len);
+    if (ret != CMD_OK)
+        HAL_UART_Transmit(&huart1, (uint8_t *)CMD_Get_Error(ret), 2, HAL_MAX_DELAY);
     HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
@@ -134,36 +135,12 @@ void DO_BLINK(int count)
             HAL_Delay(10);
         }
         HAL_Delay(100);
+        CMD_JUST_DO_ONE();
+        CMD_Show_List();
     }
 
 }
 
-void Get_ADC()
-{
-    double voltage[4];
-
-    voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
-    voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
-    voltage[2] = ads1115_get_voltage_val(hi2c1, 0x01, ADC2_SINGLE_MODE, CONFIG_REG_L);
-    voltage[3] = ads1115_get_voltage_val(hi2c1, 0x01, ADC3_SINGLE_MODE, CONFIG_REG_L);
-
-    /*Create json object*/
-    JSON_Value *root_value = json_value_init_object();
-    JSON_Object *root_object = json_value_get_object(root_value);
-    
-    char *serialized_string = NULL;
-    
-    json_object_set_string(root_object, "device", "humi");
-    for(int i = 0; i < 4; i++)
-    {
-        json_object_set_number(root_object, adc_name[i], voltage[i]);
-    }
-
-    serialized_string = json_serialize_to_string(root_value);
-    printf("%04d%s", strlen(serialized_string), serialized_string);
-    json_free_serialized_string(serialized_string);
-    json_value_free(root_value);
-}
 /* USER CODE END 0 */
 
 /**
@@ -199,7 +176,7 @@ int main(void)
     MX_I2C1_Init();
     /* USER CODE BEGIN 2 */
     //HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
-    CMD_LIST_NODE_INIT(cmd_list_header);
+    cmd_list_header = CMD_LIST_NODE_INIT();
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -214,8 +191,7 @@ int main(void)
 
         /*Wake up from stop mode*/
         HAL_Delay(10);
-        Get_ADC();
-
+        printf("wakeup\n");
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */

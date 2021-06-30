@@ -24,6 +24,7 @@ extern "C" {
 #define CMD_OK          0
 #define CMD_ADD_FAILED  1
 #define CMD_MEM_ERR     2
+#define CMD_PARSON_ERR  3
 
 #define CMD_LEN         10
 
@@ -41,8 +42,11 @@ struct command_opertation
     int (*action)(void *arg);
 };
 
-int CMD_LIST_NODE_INIT(struct command_list_node *header);
+struct command_list_node * CMD_LIST_NODE_INIT(void);
 int CMD_ADD_TAIL(uint8_t *data, uint16_t Size);
+void CMD_JUST_DO_ONE(void);
+void CMD_Show_List(void);
+char *CMD_Get_Error(int err);
 
 #ifdef __cplusplus
 }
