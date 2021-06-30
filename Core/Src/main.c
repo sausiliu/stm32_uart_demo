@@ -72,8 +72,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     /*Do echo*/
     int ret;
     ret = CMD_ADD_TAIL(rx_buffer, rx_len);
+
     if (ret != CMD_OK)
         HAL_UART_Transmit(&huart1, (uint8_t *)CMD_Get_Error(ret), 2, HAL_MAX_DELAY);
+
     HAL_UART_Receive_DMA(&huart1, rx_buffer, RX_BUFFER_SIZE);
 }
 
@@ -127,13 +129,15 @@ void DO_BLINK(int count)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
             HAL_Delay(flag > 0 ? j : breath_time - j);
         }
+
         flag = !flag;
-        
+
         /*check weather the command is empty, if not , we should do somethins...*/
         if (cmd_list_header->next != NULL)
         {
             HAL_Delay(10);
         }
+
         HAL_Delay(100);
         CMD_JUST_DO_ONE();
         CMD_Show_List();

@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;          ../Drivers/STM32F1xx_HAL_Driver/Inc;          ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;          ../Drivers/CMSIS/Device/ST/STM32F1xx/Include;          ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;           ../Drivers/STM32F1xx_HAL_Driver/Inc;           ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;           ../Drivers/CMSIS/Device/ST/STM32F1xx/Include;           ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -392,6 +392,21 @@
         <Group>
           <GroupName>Application/User/Core</GroupName>
           <Files>
+            <File>
+              <FileName>ads1115.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\ads1115.c</FilePath>
+            </File>
+            <File>
+              <FileName>parson.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\parson.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmd_list.c</FilePath>
+            </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
@@ -528,21 +543,6 @@
               <FileName>stm32f1xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>ads1115.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\ads1115.c</FilePath>
-            </File>
-            <File>
-              <FileName>parson.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\parson.c</FilePath>
-            </File>
-            <File>
-              <FileName>cmd_list.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\cmd_list.c</FilePath>
             </File>
           </Files>
         </Group>
