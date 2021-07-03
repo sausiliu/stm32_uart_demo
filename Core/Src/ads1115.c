@@ -11,6 +11,7 @@ void ads1115_config_register(I2C_HandleTypeDef ads1115_I2cHandle, uint8_t pointA
         if(HAL_I2C_GetError(&ads1115_I2cHandle) != HAL_I2C_ERROR_AF)
         {
             printf("ads1115 Config Register error!!!\r\n");
+						return;
         }
     }
 }
@@ -24,6 +25,7 @@ int16_t ads1115_read_data(I2C_HandleTypeDef ads1115_I2cHandle)
         if(HAL_I2C_GetError(&ads1115_I2cHandle) != HAL_I2C_ERROR_AF)
         {
             printf("ads1115 convert Register error!!!\r\n");
+						return 1;
         }
     }
 
@@ -32,6 +34,7 @@ int16_t ads1115_read_data(I2C_HandleTypeDef ads1115_I2cHandle)
         if(HAL_I2C_GetError(&ads1115_I2cHandle) != HAL_I2C_ERROR_AF)
         {
             printf("ads1115 read data error!!!\r\n");
+						return 1;
         }
     }
 
@@ -48,7 +51,7 @@ double ads1115_get_voltage_val(I2C_HandleTypeDef ads1115_I2cHandle, uint8_t poin
     HAL_Delay(10);
     ad_val = ads1115_read_data(ads1115_I2cHandle);
 
-    if((ad_val == 0x7FFF) | (ad_val == 0X8000)) //是否超量程了
+    if((ad_val == 0x7FFF) | (ad_val == (int16_t)0X8000)) //是否超量程了
     {
         ad_val = 0;
         printf("over PGA\r\n");
