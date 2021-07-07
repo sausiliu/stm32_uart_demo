@@ -19,6 +19,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f1xx_hal.h"
 
 #define CMD_ERROR (uint8_t *)"E"
 #define CMD_OK          0

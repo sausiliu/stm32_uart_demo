@@ -185,6 +185,10 @@ int main(void)
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+		printf("\r\n ***********************************\r\n");
+		printf("\r\n*       Hello XiaoJiu        				*\r\n");
+		printf("\r\n ***********************************\r\n");
+		HAL_Delay(2000);
     while (1)
     {
         /*Do blink*/

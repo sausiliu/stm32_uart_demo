@@ -16,6 +16,18 @@ char *CMD_ENUM[] =
     "EP", //
 };
 
+static int do_reset(void *arg)
+{
+		printf("I will reset after 5 seconds !!!\r\n");
+		for (int i = 5; i > 0; i--)
+		{
+				printf("%d\r\n", i);
+				HAL_Delay(1000);
+		}
+		NVIC_SystemReset();
+    return CMD_OK;
+}
+
 static int do_water(void *arg)
 {
     //printf("do comd do_water \n");
@@ -60,6 +72,7 @@ static const struct command_opertation operation_ids[] =
 {
     {.cmd = "water", .action = do_water},
     {.cmd = "adc", .action = get_adc},
+		{.cmd = "reset", .action = do_reset}
 };
 
 
