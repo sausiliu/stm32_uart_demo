@@ -61,7 +61,8 @@ static int get_adc(void *arg)
     }
 
     serialized_string = json_serialize_to_string(root_value);
-    printf("%04d%s", strlen(serialized_string), serialized_string);
+    //printf("%04d%s", strlen(serialized_string), serialized_string);
+		printf("%s", serialized_string);
     json_free_serialized_string(serialized_string);
     json_value_free(root_value);
 
