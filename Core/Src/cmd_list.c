@@ -30,7 +30,7 @@ static int do_reset(void *arg)
 
 static int do_water(void *arg)
 {
-    //printf("do comd do_water \n");
+	  printf("{\"topic\":\"water\", \"value\":\"ok\"}"); 
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
     HAL_Delay(6000);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
@@ -40,7 +40,7 @@ static int do_water(void *arg)
 static int get_adc(void *arg)
 {
     double voltage[4];
-    char * adc_name[4] = {"adc0", "adc1", "adc2", "adc3"};
+    char * adc_name[4] = {"value.adc0", "value.adc1", "value.adc2", "value.adc3"};
 
     voltage[0] = ads1115_get_voltage_val(hi2c1, 0x01, ADC0_SINGLE_MODE, CONFIG_REG_L);
     voltage[1] = ads1115_get_voltage_val(hi2c1, 0x01, ADC1_SINGLE_MODE, CONFIG_REG_L);
@@ -53,11 +53,11 @@ static int get_adc(void *arg)
 
     char *serialized_string = NULL;
 
-    json_object_set_string(root_object, "device", "humi");
+    json_object_set_string(root_object, "topic", "adc");
 
     for(int i = 0; i < 4; i++)
     {
-        json_object_set_number(root_object, adc_name[i], voltage[i]);
+        json_object_dotset_number(root_object, adc_name[i], voltage[i]);
     }
 
     serialized_string = json_serialize_to_string(root_value);
